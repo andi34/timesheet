@@ -1,2 +1,6 @@
+sign code: sudo docker compose exec -u www-data nextcloud php occ integrity:sign-app 
+          --privateKey /var/www/html/apps-shared/timesheet.key
+          --certificate /var/www/html/apps-shared/timesheet.crt
+          --path /var/www/html/apps-shared/timesheet
 zip: tar -czf timesheet-1.0.0.tar.gz --exclude-vcs timesheet/
-sign: sudo openssl dgst -sha512 -sign ~/nextcloud-docker-dev/data/appa-extra/timesheet.key ~/nextcloud-docker-dev/data/appa-extra/timesheet-1.0.0.tar.gz | openssl base64
+Appstore sign: sudo openssl dgst -sha512 -sign timesheet.key timesheet-1.0.0.tar.gz | openssl base64
