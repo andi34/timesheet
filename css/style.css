@@ -1,0 +1,319 @@
+/* Layout */
+.card {
+  border-radius: 8px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Tabellenstruktur */
+#ts-table,
+#hr-user-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  min-width: 900px;
+  background: var(--color-main-background, #fff);
+}
+
+#ts-table th, 
+#ts-table td,
+#hr-user-table th,
+#hr-user-table td,
+.hr-userlist th,
+.hr-userlist td {
+  border: 1px solid var(--color-border, #e1e4e8);
+  text-align: center;
+  line-height: 1.0;
+  min-width: 70px;
+  vertical-align: middle;
+  padding: 0 5px;
+}
+
+#ts-table th,
+#ts-table td {
+  height: 24px;
+}
+
+#hr-user-table th,
+#hr-user-table td {
+  height: 20px;
+}
+
+#ts-table td:nth-child(7),
+#ts-table th:nth-child(7),
+#ts-table td:nth-child(7),
+#ts-table th:nth-child(8),
+#hr-user-table td:nth-child(7),
+#hr-user-table th:nth-child(7),
+#hr-user-table td:nth-child(7),
+#hr-user-table th:nth-child(8) {
+  min-width: 140px;
+}
+
+#ts-table thead th,
+#hr-user-table thead th,
+.hr-userlist thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-background-dark, #f6f8fa);
+  font-weight: 600;
+  z-index: 2;
+}
+
+/* Heute-Highlight */
+#ts-table tbody tr.ts-today,
+#hr-user-table tbody tr.ts-today {
+  background: color-mix(in srgb, var(--color-primary, #0082c9) 12%, transparent);
+}
+
+#ts-table tbody tr.ts-today td,
+#hr-user-table tbody tr.ts-today td {
+  border-top: 2px solid var(--color-primary, #0082c9);
+  border-bottom: 2px solid var(--color-primary, #0082c9);
+}
+
+/* Inputfelder */
+#ts-table input[type="date"],
+#ts-table input[type="time"],
+#ts-table input[type="number"],
+#ts-table input[type="text"],
+#hr-user-table input[type="date"],
+#hr-user-table input[type="time"],
+#hr-user-table input[type="number"],
+#hr-user-table input[type="text"] {
+  box-sizing: border-box;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: none;
+  margin: 0;
+  min-height: 0;
+  height: 1.3em;
+}
+
+.hr-userlist .hr-user-target,
+.hr-userlist .hr-user-balance {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.hr-userlist .hr-user-target,
+.hr-userlist .hr-user-balance,
+.hr-userlist .hr-user-last-entry,
+.hr-userlist .hr-user-days-since {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.hr-userlist button.hr-load-user {
+  padding: 4px 10px;
+  border: 1px solid var(--color-border, #ccc);
+  border-radius: 4px;
+  background: #ddd;
+  cursor: pointer;
+  color: #000;
+  margin: 0;
+}
+
+.hr-userlist button.hr-load-user:hover {
+  background: #c2c2c2;
+}
+
+.hr-userlist tbody tr {
+  background: var(--color-main-background, #fff);
+}
+
+#ts-table textarea.commentInput,
+#hr-user-table textarea.commentInput {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0 2px;
+  
+  min-height: 0;
+  height: 1.3em;
+  line-height: 1.1;
+}
+
+#ts-table input[type="number"],
+#hr-user-table input[type="number"] {
+  text-align: center;
+}
+
+#ts-table tbody tr.is-weekend-row:not(.ts-today),
+#hr-user-table tbody tr.is-weekend-row:not(.ts-today) {
+  background: color-mix(in srgb, #6b7280 10%, transparent);
+}
+
+.ts-warn,
+.hr-user-errors {
+  color: #b00020;
+  font-weight: 600;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.ts-row-saved {
+  box-shadow: inset 0 0 0 2px #2e7d32;
+}
+
+/* Status */
+.ts-status {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ts-status.is-weekend {
+  font-weight: 600;
+}
+
+/* Buttons */
+button.primary {
+  background: var(--color-primary, #0082c9);
+  color: var(--color-primary-text, #fff);
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+button.primary:hover {
+  background: var(--color-primary-hover, #006ba3);
+}
+
+/* Tabs */
+.ts-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.ts-tab {
+  background: var(--color-background-dark, #f0f0f0);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ts-tab.active {
+  background: var(--color-primary, #0082c9);
+  color: #fff;
+}
+
+.ts-tabview {
+  display: none;
+}
+
+.ts-tabview.active {
+  display: block;
+}
+
+/* HR Ansicht */
+.ts-hr-section {
+  margin-bottom: 2rem;
+}
+
+.hr-back-button {
+  margin: 0 0 1rem 0;
+  padding: 6px 12px;
+  border: 1px solid var(--color-border, #ccc);
+  background: #eee;
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.hr-back-button:hover {
+  background: #ddd;
+}
+
+.hr-user-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.hr-user-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+/* Monat + Stats */
+.ts-month-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-month-row-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+#tab-mine .ts-month-row-main .hr-config-row {
+  margin-left: auto;
+}
+
+#tab-hr .hr-user-controls-row .hr-config-row {
+  margin-left: auto;
+}
+
+.ts-month-row-main h3 {
+  margin: 0 12px 0 0;
+  white-space: nowrap;
+}
+
+.month-display {
+  font-weight: bold;
+  min-width: 120px;
+  text-align: center;
+}
+
+.month-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-background-dark, #f6f8fa);
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 4px;
+  padding: 0 6px;
+  min-width: 0;
+  height: 1.8rem;
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: 0.9rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.month-nav:hover {
+  background: #ddd;
+}
+
+.ts-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+}
+
+.ts-stats div {
+  background: var(--color-background-dark, #f6f8fa);
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 6px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
