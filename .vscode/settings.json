@@ -9,6 +9,7 @@
   },
 
   "intelephense.environment.includePaths": [
-    "vendor"
+    "vendor",
+    "/home/repa/nextcloud-docker-dev/html/lib"
   ]
 }

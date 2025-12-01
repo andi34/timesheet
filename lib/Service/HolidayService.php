@@ -35,7 +35,7 @@ class HolidayService {
       try {
         $file = $folder->getFile($cacheFileName);
         $mtime = $file->getMTime(); // Letzte Änderungszeit des Cache-Files
-        if (time() - $mtime < 12 * 60 * 60) {
+        if (time() - $mtime < 15768000) { // 6 Monate in Sekunden
           $cached = json_decode($file->getContent(), true);
           if (is_array($cached)) {
             return $cached;

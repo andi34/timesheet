@@ -336,7 +336,7 @@
   * DOM Rendering & Update Functions 
   */
 
-  function createEntryRow(dateObj, entry, holidayMap = {}) {
+  function createEntryRow(dateObj, entry, holidayMap = {}, dailyMin = null) {
     const dateStr    = toLocalIsoDate(dateObj);
     const dayIndex   = dateObj.getDay();
     const isHoliday  = Object.prototype.hasOwnProperty.call(holidayMap, dateStr);
@@ -347,6 +347,7 @@
     const endMin     = entry?.endMin ?? null;
     const brkMin     = entry?.breakMinutes ?? 0;
     const durMin     = (startMin != null && endMin != null) ? Math.max(0, endMin - startMin - brkMin) : null;
+    const diffMin    = (durMin != null && dailyMin != null) ? (durMin - dailyMin) : null;
     const warning    = checkRules({ startMin, endMin, breakMinutes: brkMin }, dateStr, holidayMap);
 
     const startStr   = startMin != null ? minToHm(startMin) : '';
@@ -354,6 +355,7 @@
     const breakStr   = String(brkMin ?? 0);
     const commentStr = entry?.comment ?? '';
     const durStr     = minToHm(durMin);
+    const diffStr    = minToHm(diffMin);
 
     const tr = document.createElement('tr');
     tr.dataset.date = dateStr;
@@ -387,6 +389,7 @@
       <td><input type="number" class="breakMinutes" value="${breakStr}" min="0"></td>
       <td><input type="time" class="endTime" value="${endStr}"></td>
       <td class="ts-duration">${durStr}</td>
+      <td class="ts-diff">${diffStr}</td>
       <td><textarea class="commentInput">${commentStr}</textarea></td>
       <td class="ts-warn">${warning}</td>
     `;
@@ -428,12 +431,15 @@
 
     const holidayMap = await getHolidays(year, stateCode);
 
+    const container = userId ? document.getElementById('hr-user-entries') : null;
+    const dailyMin = getEffectiveDailyMin(container);
+
     // Build table rows for each day of the month
     const frag = document.createDocumentFragment();
     for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
       const dateKey = toLocalIsoDate(d);
       const entry   = entryMap[dateKey];
-      const row     = createEntryRow(new Date(d), entry, holidayMap);
+      const row     = createEntryRow(new Date(d), entry, holidayMap, dailyMin);
       frag.appendChild(row);
     }
     body.appendChild(frag);
@@ -444,14 +450,18 @@
   }
 
   function getEffectiveDailyMin(contextRoot) {
-    // Get the daily minutes baseline for overtime calculation.
-    // Prefer the value from the visible config input (if within given context), otherwise use loaded userConfig, else default 480 (8h).
-    const cfgMin = pickDailyMin(userConfig);
-    // If contextRoot (like HR user section) is provided, try to find a daily-min input within that context
-    const inputMin = contextRoot?.querySelector('#config-daily-min')
-      ? hmToMin(contextRoot.querySelector('#config-daily-min').value)
-      : null;
-    return (inputMin ?? cfgMin ?? 480);
+    const cfgMin = pickDailyMin(userConfig); // Fallback
+    let inputMin = null;
+    if (contextRoot) {
+      // HR-Ansicht: nimm das Feld im HR-Container
+      const input = contextRoot.querySelector('.config-daily-min');
+      if (input) inputMin = hmToMin(input.value || '');
+    } else {
+      // Meine Zeiten: nimm das Feld im eigenen Tab
+      const input = document.querySelector('#tab-mine .config-daily-min');
+      if (input) inputMin = hmToMin(input.value || '');
+    }
+    return inputMin ?? cfgMin ?? 480;
   }
 
   function updateWorkedHours(anyRow) {
@@ -642,8 +652,13 @@
     }
     const holidayMap = holidayCache.get(`${stateCode}_${dateStr.slice(0, 4)}`) || {};
 
+    const baseDailyMin = getEffectiveDailyMin(isHr ? document.getElementById('hr-user-entries') : null);
+    const diffCell     = row.querySelector('.ts-diff');
+    const diffMin      = (duration != null && baseDailyMin != null) ? (duration - baseDailyMin) : null;
+
     if (warnCell) warnCell.textContent = checkRules({ startMin, endMin, breakMinutes: payload.breakMinutes }, dateStr, holidayMap);
     if (durCell) durCell.textContent = minToHm(duration);
+    if (diffCell) diffCell.textContent = minToHm(diffMin);
 
     row.dataset.saving = '1';
 

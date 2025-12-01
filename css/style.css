@@ -1,17 +1,13 @@
 /* Layout */
 .card {
-  border-radius: 8px;
-  max-width: 100%;
+  width: 100%;
   overflow-x: auto;
 }
 
 /* Tabellenstruktur */
 #ts-table,
 #hr-user-table {
-  border-collapse: collapse;
-  table-layout: fixed;
   width: 100%;
-  min-width: 900px;
   background: var(--color-main-background, #fff);
 }
 
@@ -24,8 +20,6 @@
   border: 1px solid var(--color-border, #e1e4e8);
   text-align: center;
   line-height: 1.0;
-  min-width: 70px;
-  vertical-align: middle;
   padding: 0 5px;
 }
 
@@ -39,15 +33,25 @@
   height: 20px;
 }
 
-#ts-table td:nth-child(7),
-#ts-table th:nth-child(7),
-#ts-table td:nth-child(7),
-#ts-table th:nth-child(8),
-#hr-user-table td:nth-child(7),
-#hr-user-table th:nth-child(7),
-#hr-user-table td:nth-child(7),
-#hr-user-table th:nth-child(8) {
-  min-width: 140px;
+#ts-table tbody td:nth-child(9),
+#ts-table tbody td:nth-child(10),
+#hr-user-table tbody td:nth-child(9),
+#hr-user-table tbody td:nth-child(10) {
+  width: 30%; /* 2 * 30% = 60% */
+}
+
+#ts-table td:nth-child(5),
+#hr-user-table td:nth-child(5) {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+#ts-table input.breakMinutes,
+#hr-user-table input.breakMinutes {
+  width: 3.5em;      /* z.B. 3–4 Ziffern breit, anpassbar */
+  padding: 0;        /* kein zusätzliches Innenpadding */
+  margin: 0 auto;    /* in der Zelle zentrieren */
+  box-sizing: content-box; /* Breite nur nach Inhalt bemessen */
 }
 
 #ts-table thead th,
@@ -173,40 +177,20 @@
   font-weight: 600;
 }
 
-/* Buttons */
-button.primary {
-  background: var(--color-primary, #0082c9);
-  color: var(--color-primary-text, #fff);
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font: inherit;
-}
-
-button.primary:hover {
-  background: var(--color-primary-hover, #006ba3);
-}
-
 /* Tabs */
-.ts-tabs {
-  display: flex;
-  gap: 8px;
-  margin: 0 0 8px;
-}
-
-.ts-tab {
-  background: var(--color-background-dark, #f0f0f0);
-  border: none;
-  padding: 6px 14px;
+.ts-tabs .ts-tab {
+  background: #e5e7eb;
+  color: #111111;
+  border: 1px solid #9ca3af;
   border-radius: 6px;
-  cursor: pointer;
-  font: inherit;
+  padding: 0px 5px;
+  font-weight: 600;
 }
 
-.ts-tab.active {
-  background: var(--color-primary, #0082c9);
-  color: #fff;
+.ts-tabs .ts-tab.active {
+  background: #374151;
+  color: #ffffff;
+  border-color: #111827;
 }
 
 .ts-tabview {
@@ -253,13 +237,11 @@ button.primary:hover {
 .ts-month-row {
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
 .ts-month-row-main {
   display: flex;
   align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
 }
 
@@ -316,4 +298,30 @@ button.primary:hover {
   border-radius: 6px;
   padding: 4px 10px;
   white-space: nowrap;
+}
+
+.ts-month-row-main,
+.hr-user-controls-row {
+  background: var(--color-background-dark, #f6f8fa);
+  border: 1px solid var(--color-border, #d0d7de);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+}
+
+/* Buttons innerhalb der Kopfbereiche: klarer Kontrast */
+.ts-month-row-main button,
+.hr-user-controls-row button {
+  background: var(--color-primary, #0082c9);
+  color: var(--color-primary-text, #ffffff);
+  border: 1px solid var(--color-primary, #0082c9);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.ts-month-row-main button:hover,
+.hr-user-controls-row button:hover {
+  background: var(--color-primary-hover, #006ba3);
 }

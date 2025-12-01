@@ -30,7 +30,24 @@
         <input type="time" id="config-daily-min-mine" class="config-daily-min" value="08:00" />
 
         <label for="config-state-mine">Bundesland:</label>
-        <input type="text" id="config-state-mine" class="config-state" value="" />
+        <select id="config-state-mine" class="config-state">
+          <option value="BW">Baden-Württemberg</option>
+          <option value="BY" selected>Bayern</option>
+          <option value="BE">Berlin</option>
+          <option value="BB">Brandenburg</option>
+          <option value="HB">Bremen</option>
+          <option value="HH">Hamburg</option>
+          <option value="HE">Hessen</option>
+          <option value="MV">Mecklenburg-Vorpommern</option>
+          <option value="NI">Niedersachsen</option>
+          <option value="NW">Nordrhein-Westfalen</option>
+          <option value="RP">Rheinland-Pfalz</option>
+          <option value="SL">Saarland</option>
+          <option value="SN">Sachsen</option>
+          <option value="ST">Sachsen-Anhalt</option>
+          <option value="SH">Schleswig-Holstein</option>
+          <option value="TH">Thüringen</option>
+        </select>
         
         <button id="save-config-btn-mine" class="save-config-btn">Speichern</button>
       </div>
@@ -45,6 +62,7 @@
           <th>Pause (Min)</th>
           <th>Ende</th>
           <th>Dauer</th>
+          <th>Differenz</th>
           <th>Kommentar</th>
           <th>Warnung</th>
         </tr>
@@ -109,7 +127,24 @@
             <input type="time" id="config-daily-min-hr" class="config-daily-min" value="08:00" />
 
             <label for="config-state-hr">Bundesland:</label>
-            <input type="text" id="config-state-hr" class="config-state" value="" />
+            <select id="config-state-hr" class="config-state">
+              <option value="BW">Baden-Württemberg</option>
+              <option value="BY" selected>Bayern</option>
+              <option value="BE">Berlin</option>
+              <option value="BB">Brandenburg</option>
+              <option value="HB">Bremen</option>
+              <option value="HH">Hamburg</option>
+              <option value="HE">Hessen</option>
+              <option value="MV">Mecklenburg-Vorpommern</option>
+              <option value="NI">Niedersachsen</option>
+              <option value="NW">Nordrhein-Westfalen</option>
+              <option value="RP">Rheinland-Pfalz</option>
+              <option value="SL">Saarland</option>
+              <option value="SN">Sachsen</option>
+              <option value="ST">Sachsen-Anhalt</option>
+              <option value="SH">Schleswig-Holstein</option>
+              <option value="TH">Thüringen</option>
+            </select>
             
             <button id="save-config-btn-hr" class="save-config-btn">Speichern</button>
           </div>
@@ -124,6 +159,7 @@
               <th>Pause (Min)</th>
               <th>Ende</th>
               <th>Dauer</th>
+              <th>Differenz</th>
               <th>Kommentar</th>
               <th>Warnung</th>
             </tr>
