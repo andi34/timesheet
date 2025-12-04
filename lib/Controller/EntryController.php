@@ -9,39 +9,19 @@ use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\Attribute\NoAdminRequired;
 use OCP\IRequest;
 use OCP\IUserSession;
-use OCP\IGroupManager;
-use OCP\IConfig;
+use OCA\Timesheet\Service\HrService;
 
 class EntryController extends Controller {
-
-  /** @var string[] */
-  private array $hrGroups;
 
   public function __construct(
     string $appName,
     IRequest $request,
-    IConfig $config,
     private EntryMapper $mapper,
     private EntryService $service,
     private IUserSession $userSession,
-    private IGroupManager $groupManager
+    private HrService $hrService,
   ) {
     parent::__construct($appName, $request);
-
-    $raw = $config->getAppValue('timesheet', 'hr_groups', 'HR');
-    $this->hrGroups = array_filter(array_map('trim', explode(',', $raw)));
-  }
-
-  private function isHr(): bool {
-    $user = $this->userSession->getUser();
-    if (!$user) return false;
-    
-    $uid = $user->getUID();
-    foreach ($this->hrGroups as $group) {
-      if ($this->groupManager->isInGroup($uid, $group)) return true;
-    }
-
-    return false;
   }
 
   #[NoAdminRequired]
@@ -51,7 +31,7 @@ class EntryController extends Controller {
 
     $currentUser = $this->userSession->getUser()->getUID();
 
-    if ($user !== null && $this->isHr()) {
+    if ($user !== null && $this->hrService->isHr()) {
       $rows = $this->mapper->findByUserAndRange($user, $from, $to);
       return new DataResponse($rows);
     }
@@ -62,6 +42,17 @@ class EntryController extends Controller {
 
   #[NoAdminRequired]
   public function create(string $workDate, string $start, string $end, int $breakMinutes = 0, ?string $comment = null): DataResponse {
+    $current = $this->userSession->getUser();
+    if (!$current) {
+      return new DataResponse(['error' => 'Unauthorized'], 401);
+    }
+    $currentUid = $current->getUID();
+    $targetUid = $currentUid;
+    $userParam = $this->request->getParam('user');
+    if ($userParam !== null && $this->hrService->isHr($currentUid)) {
+      $targetUid = $userParam;
+    }
+
     $payload = [
       'workDate' => $workDate,
       'startMin' => self::hmToMin($start),
@@ -69,7 +60,8 @@ class EntryController extends Controller {
       'breakMinutes' => $breakMinutes,
       'comment' => $comment,
     ];
-    $entry = $this->service->create($payload);
+
+    $entry = $this->service->create($payload, $targetUid);
     return new DataResponse($entry);
   }
 
@@ -81,13 +73,13 @@ class EntryController extends Controller {
     if ($end !== null)      $data['endMin']   = self::hmToMin($end);
     if ($breakMinutes !== null) $data['breakMinutes'] = $breakMinutes;
     if ($comment !== null)  $data['comment']  = $comment;
-    $entry = $this->service->update($id, $data, $this->isHr());
+    $entry = $this->service->update($id, $data, $this->hrService->isHr());
     return new DataResponse($entry);
   }
 
   #[NoAdminRequired]
   public function delete(int $id): DataResponse {
-    $this->service->delete($id, $this->isHr());
+    $this->service->delete($id, $this->hrService->isHr());
     return new DataResponse(['ok' => true]);
   }
 
