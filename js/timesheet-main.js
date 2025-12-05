@@ -47,7 +47,15 @@
   * Utility Functions 
   */
 
-  const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']; // Weekday abbreviations in German
+  // Weekday abbreviations
+  const days = [t('timesheet', 'Sun'), 
+                t('timesheet', 'Mon'), 
+                t('timesheet', 'Tue'), 
+                t('timesheet', 'Wed'), 
+                t('timesheet', 'Thu'), 
+                t('timesheet', 'Fri'), 
+                t('timesheet', 'Sat')
+  ];
 
   function formatDate(dateObj) {
     // Format a Date to DD.MM.YYYY (German locale style)
@@ -106,13 +114,13 @@
     const issues = [];
 
     // Zeitliche Grenzen
-    if (dur > 10 * 60) issues.push('Über Höchstzeit');
+    if (dur > 10 * 60) issues.push(t('timesheet', 'Above maximum time'));
 
     // Pausenregelung
     if (dur > 9 * 60 && brk < 45) {
-      issues.push('Pause zu kurz');
+      issues.push(t('timesheet', 'Break too short'));
     } else if (dur > 6 * 60 && brk < 30) {
-      issues.push('Pause zu kurz');
+      issues.push(t('timesheet', 'Break too short'));
     }
 
     // Kalenderregeln
@@ -121,8 +129,8 @@
       const isSunday = date.getDay() === 0;
       const isHoliday = holidayMap && holidayMap[dateStr];
 
-      if (isSunday) issues.push('Sonntagsarbeit nicht gestattet');
-      if (isHoliday) issues.push('Feiertagsarbeit nicht gestattet');
+      if (isSunday) issues.push(t('timesheet', 'Sunday work not allowed'));
+      if (isHoliday) issues.push(t('timesheet', 'Holiday work not allowed'));
     }
 
     return issues.join(', ');
@@ -178,6 +186,96 @@
     const timeStr = minutes != null ? minToHm(minutes) : '';
     dailyMinInputs.forEach(input => { input.value = timeStr; });
     stateInputs.forEach(input => { input.value = state ?? ''; });
+  }
+
+  function toCsv(rows, sep = ';') {
+    return rows.map(cols => cols.map(val => {
+      const s = val == null ? '' : String(val);
+      if (s.includes(sep) || s.includes('"') || s.includes('\n')) {
+        return '"' + s.replace(/"/g, '""') + '"';
+      }
+      return s;
+    }).join(sep)).join('\r\n');
+  }
+
+  function exportCurrentViewToCsv(isHr) {
+    const container = isHr ? hrUserEntries : document.getElementById('tab-mine');
+    if (!container) return;
+
+    const table = isHr ? container.querySelector('#hr-user-table') : container.querySelector('#ts-table');
+    if (!table) return;
+
+    const rows = [];
+
+    // 1) User
+    const userLabel = isHr 
+      ? (document.querySelector('#hr-user-title span')?.textContent || '')
+      : (typeof currentUserId !== 'undefined' ? currentUserId : '');
+
+    // 2) Worked & Overtime
+    const workedEl   = container.querySelector('#worked-hours-month');
+    const overtimeEl = container.querySelector('#overtime-month');
+    const workedMonth   = workedEl?.textContent.trim() || '';
+    const overtimeMonth = overtimeEl?.textContent.trim() || '';
+
+    // 3) Daily working time
+    const dailyMin = getEffectiveDailyMin(isHr ? container : null);
+    const dailyHm = dailyMin != null ? minToHm(dailyMin) : '';
+
+    rows.push([t('timesheet', 'User'), userLabel]);
+    rows.push([t('timesheet', 'Worked Hours'), workedMonth]);
+    rows.push([t('timesheet', 'Overtime'), overtimeMonth]);
+    rows.push([t('timesheet', 'Daily working time'), dailyHm]);
+    rows.push([]); // empty row
+
+    // 4) Table Header
+    const headerRow = [
+      t('timesheet', 'Date'),
+      "",
+      t('timesheet', 'Status'),
+      t('timesheet', 'Start'),
+      t('timesheet', 'Break (min)'),
+      t('timesheet', 'End'),
+      t('timesheet', 'Duration'),
+      t('timesheet', 'Difference'),
+      t('timesheet', 'Comment'),
+      t('timesheet', 'Warning')
+    ];
+    rows.push(headerRow);
+
+    // 5) Table Rows
+    const body = table.querySelector('tbody');
+    if (body) {
+      body.querySelectorAll('tr').forEach(tr => {
+        const cols = Array.from(tr.cells).map(td => {
+          const input = td.querySelector('input, textarea');
+          if (input) {
+            return input.value;
+          }
+          return td.textContent.trim();
+        });
+        rows.push(cols);
+      });
+    }
+
+    const csv = toCsv(rows);
+
+    const refMonth = isHr ? hrCurrentMonth : currentMonth;
+    const year = refMonth.getFullYear();
+    const month = String(refMonth.getMonth() + 1).padStart(2, '0');
+    const monthStr = `${year}-${month}`;
+
+    const baseName = isHr ? (userLabel || 'employee') : (typeof currentUserId !== 'undefined' ? currentUserId : 'me');
+
+    const blob = new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `${t('timesheet', 'timesheet')}-${baseName}-${monthStr}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   /**
@@ -286,16 +384,16 @@
               diffDays = Math.floor((Date.parse(todayStr) - Date.parse(lastDateStr)) / (1000 * 60 * 60 * 24));
               if (diffDays < 0) diffDays = 0;
               if (daysCell) daysCell.textContent = String(diffDays);
-              if (diffDays >= 14) errors.push('Mehr als 14 Tage kein Eintrag');
+              if (diffDays >= 14) errors.push(t('timesheet', 'No entry for more than 14 days'));
             } else {
-              errors.push('Mehr als 14 Tage kein Eintrag');
+              errors.push(t('timesheet', 'No entry for more than 14 days'));
             }
 
             if (typeof overtimeMinutes === 'number') {
               if (overtimeMinutes > 600) {
-                errors.push('Zu viele Überstunden');
+                errors.push(t('timesheet', 'Too much overtime'));
               } else if (overtimeMinutes < -600) {
-                errors.push('Zu viele Minusstunden');
+                errors.push(t('timesheet', 'Too many negative hours'));
               }
             }
 
@@ -341,7 +439,7 @@
     const dayIndex   = dateObj.getDay();
     const isHoliday  = Object.prototype.hasOwnProperty.call(holidayMap, dateStr);
     const isWeekend  = (dayIndex === 0 || dayIndex === 6);
-    const statusText = isHoliday ? 'Feiertag' : (isWeekend ? 'Wochenende' : '');
+    const statusText = isHoliday ? t('timesheet', 'Holiday') : (isWeekend ? t('timesheet', 'Weekend') : '');
 
     const startMin   = entry?.startMin ?? null;
     const endMin     = entry?.endMin ?? null;
@@ -458,7 +556,7 @@
       if (input) inputMin = hmToMin(input.value || '');
     } else {
       // Meine Zeiten: nimm das Feld im eigenen Tab
-      const input = document.querySelector('#tab-mine .config-daily-min');
+      const input = document.getElementById('config-daily-min-mine');
       if (input) inputMin = hmToMin(input.value || '');
     }
     return inputMin ?? cfgMin ?? 480;
@@ -532,6 +630,7 @@
     const commentInput = row.querySelector('.commentInput');
     const warnCell     = row.querySelector('.ts-warn');
     const durCell      = row.querySelector('.ts-duration');
+    const diffCell     = row.querySelector('.ts-diff');
 
     await api(`/api/entries/${encodeURIComponent(entryId)}`, { method: 'DELETE' });
 
@@ -549,6 +648,7 @@
 
     if (warnCell) warnCell.textContent = '';
     if (durCell)  durCell.textContent  = '--:--';
+    if (diffCell) diffCell.textContent = '--:--';
 
     updateWorkedHours(row);
 
@@ -570,6 +670,7 @@
     const commentInput = row.querySelector('.commentInput');
     const warnCell     = row.querySelector('.ts-warn');
     const durCell      = row.querySelector('.ts-duration');
+    const diffCell     = row.querySelector('.ts-diff');
 
     if (!startInput || !endInput || !breakInput) return;
 
@@ -594,6 +695,7 @@
       if (!hasAnyTime && !commentNonEmpty) {
         if (warnCell) warnCell.textContent = '';
         if (durCell)  durCell.textContent  = '--:--';
+        if (diffCell) diffCell.textContent = '--:--';
       }
       return;
     };
@@ -620,12 +722,12 @@
 
     // Nur Kommentar vorhanden, Zeit leer → nichts tun
     if (!hasBothTimes && commentNonEmpty) {
-      if (warnCell) warnCell.textContent = 'Zeitangabe fehlt';
+      if (warnCell) warnCell.textContent = t('timesheet', 'Time missing');
       return;
     }
 
     if (!hasBothTimes && !commentNonEmpty) {
-      if (warnCell) warnCell.textContent = 'Zeitangabe unvollständig';
+      if (warnCell) warnCell.textContent = t('timesheet', 'Time incomplete');
       return;
     }
     
@@ -653,7 +755,6 @@
     const holidayMap = holidayCache.get(`${stateCode}_${dateStr.slice(0, 4)}`) || {};
 
     const baseDailyMin = getEffectiveDailyMin(isHr ? document.getElementById('hr-user-entries') : null);
-    const diffCell     = row.querySelector('.ts-diff');
     const diffMin      = (duration != null && baseDailyMin != null) ? (duration - baseDailyMin) : null;
 
     if (warnCell) warnCell.textContent = checkRules({ startMin, endMin, breakMinutes: payload.breakMinutes }, dateStr, holidayMap);
@@ -902,6 +1003,14 @@
     if (!row) return;
 
     await saveRowIfNeeded(row);
+  });
+
+  document.getElementById('export-mine-csv')?.addEventListener('click', () => {
+    exportCurrentViewToCsv(false);
+  });
+
+  document.getElementById('export-hr-csv')?.addEventListener('click', () => {
+    exportCurrentViewToCsv(true);
   });
 
   /**
